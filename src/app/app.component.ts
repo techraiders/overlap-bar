@@ -11,13 +11,14 @@ export class AppComponent implements OnInit {
   BarChart : any;
 
   ngOnInit () {
+    
     this.BarChart = new Chart('barChart', {
-      type: 'horizontalBar',
+      type: 'bar',
       data: {
         labels: ['Red', 'Blue', 'Yellow', 'Green'],
         datasets: [
           {
-            label: 'Number of Votes',
+            label: 'Sales per month euro',
             data: [2, 4, 3, 3],
             //backgroundColor: 'rgba(255, 99, 132)',
             //borderColor: 'green',
@@ -33,6 +34,10 @@ export class AppComponent implements OnInit {
               'rgba(255, 206, 86, 1)'
             ],
             borderWidth: 2
+          }, {
+            label: 'Sales per month in dollar',
+            data: [10, 10, 5, 3],
+            backgroundColor: ['blue', 'red', 'green', 'pink', 'grey', 'purple', 'tomato']
           }
         ]
       },
