@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
               'rgba(54, 162, 235, 1)',
               'rgba(255, 206, 86, 1)'
             ],
-            borderWidth: 1
+            borderWidth: 2
           }
         ]
       },
@@ -46,9 +46,15 @@ export class AppComponent implements OnInit {
         },
         scales: {
           xAxes: [{
-            stacked: true
+            stacked: true,
+            gridLines: {
+              display: false
+            }
           }],
           yAxes: [{
+            gridLines: {
+              display: false
+            },
             ticks: {
               beginAtZero: true
             },
