@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit () {
     this.BarChart = new Chart('barChart', {
-      type: 'bar',
+      type: 'horizontalBar',
       data: {
         labels: ['Red', 'Blue', 'Yellow', 'Green'],
         datasets: [
