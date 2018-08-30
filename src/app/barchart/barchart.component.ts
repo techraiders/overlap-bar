@@ -11,21 +11,69 @@ export class BarchartComponent implements OnInit {
 
   BarChart : any;
 
-  currentSeries = [4, 10, 3, 9];
-  previousSeries = [10, 4, 5, 3];
-  xAxislabels = ['North', 'East', 'West', 'South'];
+  currentSeries = this.bcs.currentSeries;
+  previousSeries = this.bcs.previousSeries;
+  xAxislabels = this.bcs.xAxislabels;
+  backup = [];
 
   constructor (private bcs : BarchartService) {
-    console.log(bcs);
-  }
+
+  }  
 
   computeSeries (clickedEl) {
+    this.backup.push({
+      xAxislabels: JSON.parse(JSON.stringify(this.xAxislabels)),
+      currentSeries: JSON.parse(JSON.stringify(this.currentSeries)),
+      previousSeries: JSON.parse(JSON.stringify(this.previousSeries))
+    });
     let config = this.bcs.computeSeries(clickedEl);
-    this.updateChart(config);
+    if (config) {
+      this.updateChart(config);
+    }
+  }
+
+  goBack () {    
+    if (this.backup && this.backup.length) {
+      let last = this.backup.pop();
+
+      last.xAxislabels.forEach((label, index) => {
+        this.xAxislabels[index] = label;
+      });
+      
+      last.currentSeries.forEach((val, index) => {
+        this.currentSeries[index] = val;
+      });
+
+      last.previousSeries.forEach((val, index) => {
+        this.previousSeries[index] = val;
+      });
+
+      this.BarChart.update();
+    }
+  }
+
+  goTop () {
+    if (this.backup && this.backup.length) {
+      let first = this.backup[0];
+      this.backup.length = 0;
+
+      first.xAxislabels.forEach((label, index) => {
+        this.xAxislabels[index] = label;
+      });
+
+      first.currentSeries.forEach((val, index) => {
+        this.currentSeries[index] = val;
+      });
+
+      first.previousSeries.forEach((val, index) => {
+        this.previousSeries[index] = val;
+      });
+      this.BarChart.update();
+    }
   }
 
   updateChart (config) {
-    if (config && config.xAxislabels && config.xAxislabels.length) {
+    if (config.xAxislabels && config.xAxislabels.length) {
       config.xAxislabels.forEach((val, index) => {
         this.xAxislabels[index] = val;
       });
@@ -115,16 +163,24 @@ export class BarchartComponent implements OnInit {
         let clickedEl = i[0]._model.label;
         this.computeSeries(clickedEl);
       }
-    }
+    },
+    events: ['hover', 'click'],
+    /* onHover: (event) => {
+      Chart.helpers.each(this.BarChart.getDatasetMeta(1).data, function (rectangle) {
+        rectangle._view.width = rectangle._model.width = 40;
+      });
+      this.BarChart.draw();
+      // this.renderChart();
+    } */
   };
 
   ngOnInit () {
     Chart.plugins.register({
       afterDatasetsUpdate: function(chart) {
-        Chart.helpers.each(chart.getDatasetMeta(0).data, function(rectangle, index) {
+        Chart.helpers.each(chart.getDatasetMeta(1).data, function(rectangle, index) {
           rectangle._view.width = rectangle._model.width = 30;
         });
-      },
+      }
     });
     
     this.renderChart();
@@ -138,8 +194,8 @@ export class BarchartComponent implements OnInit {
       options: this.options
     });
     
-    this.BarChart.config.data.datasets[0].data.forEach((bar, index) => {
-      dashedBorder(this.BarChart, 0, index, [10, 15]);
+    this.BarChart.config.data.datasets[1].data.forEach((bar, index) => {
+      dashedBorder(this.BarChart, 1, index, [10, 15]);
     });
   }
 }
