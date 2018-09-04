@@ -10,17 +10,21 @@ import { BarchartService } from './barchart.service';
 export class BarchartComponent implements OnInit {
 
   BarChart : any;
-
   currentSeries = this.bcs.currentSeries;
   previousSeries = this.bcs.previousSeries;
   xAxislabels = this.bcs.xAxislabels;
+  currentDate = this.bcs.currentDate;
   backup = [];
+  durations = this.bcs.durations;
+  selectedDuration: any;
 
-  constructor (private bcs : BarchartService) {
+  onSelectedDurationChange (a) {
+    //console.log(this.selectedDuration);
+  }
 
-  }  
+  constructor (private bcs : BarchartService) { }  
 
-  computeSeries (clickedEl) {
+  /*computeSeries (clickedEl) {
     this.backup.push({
       xAxislabels: JSON.parse(JSON.stringify(this.xAxislabels)),
       currentSeries: JSON.parse(JSON.stringify(this.currentSeries)),
@@ -29,8 +33,8 @@ export class BarchartComponent implements OnInit {
     let config = this.bcs.computeSeries(clickedEl);
     if (config) {
       this.updateChart(config);
-    }
-  }
+    } 
+  } */
 
   goBack () {    
     if (this.backup && this.backup.length) {
@@ -101,28 +105,28 @@ export class BarchartComponent implements OnInit {
 
   data = {
     labels: this.xAxislabels,
-    datasets: [
-      {
+    datasets: [ {
+      label: 'Driver\'s pick up drop for previous date',
+      data: this.previousSeries,
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)'
+      ],
+      //backgroundColor: 'rgba(255, 99, 132)',
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)'
+      ],
+      borderWidth: 3,
+      xAxisID: 'bar-x-axis1'
+    }, {
         label: 'Driver\'s pick up drop for selected date',
-        data: this.currentSeries,
-        //backgroundColor: 'rgba(255, 99, 132)',
-        //borderColor: 'green',
-        //Separate colors for each bars
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)'
-        ],
-        borderWidth: 2,
-        xAxisID: 'bar-x-axis1'
-      }, {
-        label: 'Driver\'s pick up drop for previous date',
-        data: this.previousSeries,
+        data: this.currentSeries,        
+        borderColor: 'black',
+        borderWidth: 3,
+        //Separate colors for each bars       
         backgroundColor: ['blue', 'red', 'green', 'pink'],
         xAxisID: 'bar-x-axis1'
       }
@@ -130,6 +134,53 @@ export class BarchartComponent implements OnInit {
   };
 
   options = {
+    tooltips: {
+      enabled: false,
+      custom: function (tooltipModel) {
+        // Tooltip Element
+        let tooltipEl = document.getElementById('chartjs-tooltip');
+
+        // Create element on first render
+        if (!tooltipEl) {
+          tooltipEl = document.createElement('div');
+          tooltipEl.id = 'chartjs-tooltip';
+          tooltipEl.innerHTML = `<div>
+            <p> <strong> +10% </strong> </p>
+          </div>`;
+          document.body.appendChild(tooltipEl);
+        }
+
+        // Hide if no tooltip
+        /* if (tooltipModel.opacity === 0) {
+          tooltipEl.style.opacity = '0';
+          return;
+        } */
+
+        // Set caret position
+        /*tooltipEl.classList.remove('above', 'below', 'no-transform');
+        if (tooltipModel.yAlign) {
+          tooltipEl.classList.add(tooltipModel.yAlign);
+        } else {
+          tooltipEl.classList.add('no-transform');
+        }*/
+
+        function getBody (bodyItem) {
+          return bodyItem.lines;
+        }
+
+        let position = this._chart.canvas.getBoundingClientRect();
+
+        // Display, position, and set styles for font
+        tooltipEl.style.opacity = '1';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
+        /*tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
+         tooltipEl.style.fontFamily = tooltipModel._bodyFontFamily;
+        tooltipEl.style.fontSize = tooltipModel.bodyFontSize + 'px';
+        tooltipEl.style.fontStyle = tooltipModel._bodyFontStyle;
+        tooltipEl.style.padding = tooltipModel.yPadding + 'px ' + tooltipModel.xPadding + 'px'; */
+      }
+    },
     legend: {
       display: true
     },
@@ -143,14 +194,14 @@ export class BarchartComponent implements OnInit {
         stacked: true,
         id: 'bar-x-axis1',
         gridLines: {
-          display: false
+          display: true
         },
-        barThickness: 70
+        barThickness: 30
       }],
       yAxes: [{
         // display: false,
         gridLines: {
-          display: false
+          display: true
         },
         ticks: {
           beginAtZero: true
@@ -161,13 +212,13 @@ export class BarchartComponent implements OnInit {
     onClick: (event, i) => {
       if (i[0] && i[0]._model && i[0]._model.label) {
         let clickedEl = i[0]._model.label;
-        this.computeSeries(clickedEl);
+        /* this.computeSeries(clickedEl); */
       }
     },
-    events: ['hover', 'click'],
-    /* onHover: (event) => {
+    events: ['mousemove', 'click'],
+    /* onMousemove: (event) => {
       Chart.helpers.each(this.BarChart.getDatasetMeta(1).data, function (rectangle) {
-        rectangle._view.width = rectangle._model.width = 40;
+        //rectangle._view.width = rectangle._model.width = 40;
       });
       this.BarChart.draw();
       // this.renderChart();
@@ -175,13 +226,18 @@ export class BarchartComponent implements OnInit {
   };
 
   ngOnInit () {
+    this.selectedDuration = this.durations[0];
     Chart.plugins.register({
       afterDatasetsUpdate: function(chart) {
         Chart.helpers.each(chart.getDatasetMeta(1).data, function(rectangle, index) {
-          rectangle._view.width = rectangle._model.width = 30;
+          rectangle._view.width = rectangle._model.width = 70;
         });
       }
     });
+
+    let result = this.bcs.traverse(this.bcs.root);
+    console.log(this.bcs.root);
+    
     
     this.renderChart();
   }
@@ -194,10 +250,20 @@ export class BarchartComponent implements OnInit {
       options: this.options
     });
     
-    this.BarChart.config.data.datasets[1].data.forEach((bar, index) => {
-      dashedBorder(this.BarChart, 1, index, [10, 15]);
+    this.BarChart.config.data.datasets[0].data.forEach((bar, index) => {
+      dashedBorder(this.BarChart, 0, index, [10, 15]);
     });
   }
+
+  /* splitByDate () {
+    // params = {barLabel: the bar you want to split 'hub1'};
+    let result = this.bcs.splitByDate('driver1');
+    this.BarChart.update();
+  }
+  splitByDay () {
+    let result = this.bcs.splitByDay('driver1');
+    this.BarChart.update();
+  } */
 }
 
 // dashedBorder(chart, datasetIndex, barIndex, dash values)
