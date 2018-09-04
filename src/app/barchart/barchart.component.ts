@@ -24,21 +24,24 @@ export class BarchartComponent implements OnInit {
 
   constructor (private bcs : BarchartService) { }  
 
-  /*computeSeries (clickedEl) {
-    this.backup.push({
-      xAxislabels: JSON.parse(JSON.stringify(this.xAxislabels)),
-      currentSeries: JSON.parse(JSON.stringify(this.currentSeries)),
-      previousSeries: JSON.parse(JSON.stringify(this.previousSeries))
-    });
-    let config = this.bcs.computeSeries(clickedEl);
-    if (config) {
-      this.updateChart(config);
-    } 
-  } */
+  computeSeries (clickedEl) {
+    if (clickedEl) {
+      this.backup.push({
+        xAxislabels: JSON.parse(JSON.stringify(this.xAxislabels)),
+        currentSeries: JSON.parse(JSON.stringify(this.currentSeries)),
+        previousSeries: JSON.parse(JSON.stringify(this.previousSeries))
+      });
+    }
+    
+    this.bcs.computeSeries(clickedEl);
+  }
 
   goBack () {    
     if (this.backup && this.backup.length) {
       let last = this.backup.pop();
+      this.xAxislabels.length = 0;
+      this.currentSeries.length = 0;
+      this.previousSeries.length = 0;
 
       last.xAxislabels.forEach((label, index) => {
         this.xAxislabels[index] = label;
@@ -108,79 +111,79 @@ export class BarchartComponent implements OnInit {
     datasets: [ {
       label: 'Driver\'s pick up drop for previous date',
       data: this.previousSeries,
-      backgroundColor: [
+      /* backgroundColor: [
         'rgba(255, 99, 132, 0.2)',
         'rgba(54, 162, 235, 0.2)',
         'rgba(255, 206, 86, 0.2)'
-      ],
-      //backgroundColor: 'rgba(255, 99, 132)',
+      ], */
+      backgroundColor: 'rgb(138, 100, 147)',
       borderColor: [
         'rgba(255, 99, 132, 1)',
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)'
       ],
-      borderWidth: 3,
+//       borderWidth: 3,
       xAxisID: 'bar-x-axis1'
     }, {
         label: 'Driver\'s pick up drop for selected date',
         data: this.currentSeries,        
         borderColor: 'black',
-        borderWidth: 3,
-        //Separate colors for each bars       
-        backgroundColor: ['blue', 'red', 'green', 'pink'],
+        // borderWidth: 3,
+        // Separate colors for each bars       
+        backgroundColor: 'rgb(161, 170, 218)',
         xAxisID: 'bar-x-axis1'
       }
     ]
   };
 
   options = {
-    tooltips: {
-      enabled: false,
-      custom: function (tooltipModel) {
-        // Tooltip Element
-        let tooltipEl = document.getElementById('chartjs-tooltip');
+//     tooltips: {
+//       enabled: false,
+//       custom: function (tooltipModel) {
+//         // Tooltip Element
+//         let tooltipEl = document.getElementById('chartjs-tooltip');
 
-        // Create element on first render
-        if (!tooltipEl) {
-          tooltipEl = document.createElement('div');
-          tooltipEl.id = 'chartjs-tooltip';
-          tooltipEl.innerHTML = `<div>
-            <p> <strong> +10% </strong> </p>
-          </div>`;
-          document.body.appendChild(tooltipEl);
-        }
+//         // Create element on first render
+//         if (!tooltipEl) {
+//           tooltipEl = document.createElement('div');
+//           tooltipEl.id = 'chartjs-tooltip';
+//           tooltipEl.innerHTML = `<div>
+//             <p> <strong> +10% </strong> </p>
+//           </div>`;
+//           document.body.appendChild(tooltipEl);
+//         }
 
-        // Hide if no tooltip
-        /* if (tooltipModel.opacity === 0) {
-          tooltipEl.style.opacity = '0';
-          return;
-        } */
+//         // Hide if no tooltip
+//         /* if (tooltipModel.opacity === 0) {
+//           tooltipEl.style.opacity = '0';
+//           return;
+//         } */
 
-        // Set caret position
-        /*tooltipEl.classList.remove('above', 'below', 'no-transform');
-        if (tooltipModel.yAlign) {
-          tooltipEl.classList.add(tooltipModel.yAlign);
-        } else {
-          tooltipEl.classList.add('no-transform');
-        }*/
+//         // Set caret position
+//         /*tooltipEl.classList.remove('above', 'below', 'no-transform');
+//         if (tooltipModel.yAlign) {
+//           tooltipEl.classList.add(tooltipModel.yAlign);
+//         } else {
+//           tooltipEl.classList.add('no-transform');
+//         }*/
 
-        function getBody (bodyItem) {
-          return bodyItem.lines;
-        }
+//         function getBody (bodyItem) {
+//           return bodyItem.lines;
+//         }
 
-        let position = this._chart.canvas.getBoundingClientRect();
+//         let position = this._chart.canvas.getBoundingClientRect();
 
-        // Display, position, and set styles for font
-        tooltipEl.style.opacity = '1';
-        tooltipEl.style.position = 'absolute';
-        tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
-        /*tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
-         tooltipEl.style.fontFamily = tooltipModel._bodyFontFamily;
-        tooltipEl.style.fontSize = tooltipModel.bodyFontSize + 'px';
-        tooltipEl.style.fontStyle = tooltipModel._bodyFontStyle;
-        tooltipEl.style.padding = tooltipModel.yPadding + 'px ' + tooltipModel.xPadding + 'px'; */
-      }
-    },
+//         // Display, position, and set styles for font
+//         tooltipEl.style.opacity = '1';
+//         tooltipEl.style.position = 'absolute';
+//         tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
+//         /*tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
+//          tooltipEl.style.fontFamily = tooltipModel._bodyFontFamily;
+//         tooltipEl.style.fontSize = tooltipModel.bodyFontSize + 'px';
+//         tooltipEl.style.fontStyle = tooltipModel._bodyFontStyle;
+//         tooltipEl.style.padding = tooltipModel.yPadding + 'px ' + tooltipModel.xPadding + 'px'; */
+//       }
+//     },
     legend: {
       display: true
     },
@@ -212,7 +215,8 @@ export class BarchartComponent implements OnInit {
     onClick: (event, i) => {
       if (i[0] && i[0]._model && i[0]._model.label) {
         let clickedEl = i[0]._model.label;
-        /* this.computeSeries(clickedEl); */
+        this.computeSeries({searchTerm: clickedEl});
+        this.BarChart.update();
       }
     },
     events: ['mousemove', 'click'],
@@ -237,7 +241,7 @@ export class BarchartComponent implements OnInit {
 
     let result = this.bcs.traverse(this.bcs.root);
     console.log(this.bcs.root);
-    
+    this.computeSeries(null);
     
     this.renderChart();
   }

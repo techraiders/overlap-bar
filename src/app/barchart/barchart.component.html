@@ -3,7 +3,7 @@
  
  <button (click)="splitByDate()">split by date</button> 
  <button (click)="splitByDay()">split by day</button> 
- <div style="width:100%; height: 700px;">
+ <div style="width:50%;">
     <select [(ngModel)]="selectedDuration" (change)="onSelectedDurationChange()">
       <option *ngFor="let duration of durations" [ngValue]="duration"> {{duration.label}} </option>
     </select>
