@@ -142,20 +142,18 @@ export class BarchartService  {
 
   splitByDate (params) {
    if (this.currentRoot && this.currentRoot.rides && this.currentRoot.rides.length) {
-     this.xAxislabels.length = 0;
-     this.currentSeries.length = 0;
-     this.previousSeries.length = 0;
-     this.currentRoot.rides.forEach((ride,index) => {
-       this.xAxislabels[index] = this.datePipe.transform(ride.date, 'dd/MM/yyyy');
-       this.currentSeries[index] = ride.count;
-       this.previousSeries[index] = ride.previousCount;
-     });
+     return this.splitByDateForThisRoot(this.currentRoot);
    } else if (this.root && this.root.rides && this.root.rides.length) {
-      this.xAxislabels.length = 0;
+      return this.splitByDateForThisRoot(this.root);
+    }
+  }
+
+  splitByDateForThisRoot (root) {
+    this.xAxislabels.length = 0;
       this.currentSeries.length = 0;
       this.previousSeries.length = 0;
       
-      this.root.rides.forEach((ride, index) => {
+      root.rides.forEach((ride, index) => {
         this.xAxislabels[index] = this.datePipe.transform(ride.date, 'dd/MM/yyyy');
 //         this.previousSeries[index] = 0;
       });
@@ -184,10 +182,10 @@ export class BarchartService  {
         }
       ];
 
-      if (this.root.children && this.root.children.length) {
+      if (root.children && root.children.length) {
         for (let index in this.xAxislabels) {
-          for (let zoneIndex in this.root.children) {
-            for (let ride of this.root.children[zoneIndex].rides) {
+          for (let zoneIndex in root.children) {
+            for (let ride of root.children[zoneIndex].rides) {
               if (this.xAxislabels[index] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
                 datasets[zoneIndex].data[index] += ride.count;
                 break;
@@ -197,7 +195,6 @@ export class BarchartService  {
         }
         return {xAxislabels: this.xAxislabels, datasets};
       }
-    }
   }
 
   /*splitByDay (barName) {
