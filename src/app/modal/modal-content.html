@@ -1,0 +1,45 @@
+<div class="modal-header">
+  <h4 class="modal-title">Configure Chart</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <pre> {{configuration | json}} </pre>
+
+  <form>
+    <div class="row">
+      <div class="col-md-6" style="border: 1px dashed black">
+        <div class="radio disabled">
+          <label><input type="radio" value="timewise"  name="dimension" [(ngModel)]="configuration.dimension" disabled> Timewise </label>
+        </div>
+        <div class="radio disabled">
+          <label><input type="radio" value="daywise" name="dimension" [(ngModel)]="configuration.dimension" disabled> Daywise</label>
+        </div>
+        <div class="radio disabled">
+          <label><input type="radio" value="hourwise" name="dimension" [(ngModel)]="configuration.dimension" disabled> Hour wise</label>
+        </div>        
+      </div>
+      <div class="col-md-6" style="border: 1px dashed black">
+        <div class="radio">
+          <label><input type="radio" value="areawise" name="dataHierarchy" (change)="onDataHierarchyChange($event)" [(ngModel)]="configuration.dataHierarchy"> Areawise</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" value="dealerwise" name="dataHierarchy" [(ngModel)]="configuration.dataHierarchy"> Dealerwise </label>
+        </div>
+
+          <div class="row" *ngIf="configuration.dataHierarchy === 'dealerwise'">
+            <div class="col-md-12">
+              <div class="radio" *ngFor="let dealer of [{name: 'dealer1'}, {name: 'dealer2'}]">
+                <label> <input type="radio" [value]="dealer.name" name="dealerName" [(ngModel)]="configuration.dealerName"/> {{dealer.name}} </label>
+              </div>
+            </div>
+          </div>
+
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
+</div>

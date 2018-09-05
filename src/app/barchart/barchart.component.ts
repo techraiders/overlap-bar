@@ -199,7 +199,6 @@ export class BarchartComponent implements OnInit {
     this.selectedDuration = this.durations[0];
 
     let result = this.bcs.traverse(this.bcs.root);
-    console.log(this.bcs.root);
     this.computeSeries(null);
     
     this.renderChart();
@@ -233,6 +232,7 @@ export class BarchartComponent implements OnInit {
       result.datasets.forEach((dataset, index) => {        
         this.BarChart.data.datasets.push(dataset);
       });
+      this.BarChart.options.scales.xAxes.forEach(axis => axis.stacked = false;);
       this.BarChart.update();
       //this.BarChart.draw();
     }

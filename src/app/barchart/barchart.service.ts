@@ -97,6 +97,61 @@ export class BarchartService  {
             ]
           }
         ]
+      }, {
+        name: 'east',
+        count: 0,
+        previousCount: 0,
+        rides: [],
+        children: [
+          {
+            name: 'east.bihar',
+            count: 0,
+            previousCount: 0,
+            rides: [],
+            children: [
+              {
+                name: 'east.bihar.chapra',
+                count: 0,
+                previousCount: 0,
+                rides: [],
+                children: [
+                  {
+                    name: 'east.bihar.chapra.dealer1',
+                    count: 0,
+                    previousCount: 0,
+                    rides: [],
+                    children: [
+                      {
+                        name: 'chapra hub1',
+                        count: 0,
+                        previousCount: 0,
+                        rides: [],
+                        children: [
+                          {
+                            name: 'chapra driver1',
+                            count: 0,
+                            previousCount: 0,
+                            rides: [
+                              {count: 0, date: new Date(), previousCount: 0}
+                            ]
+                          },
+                          {
+                            name: 'chapra driver2',
+                            count: 0,
+                            previousCount: 0,
+                            rides: [
+                              {count: 0, date: new Date(), previousCount: 0}
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   };
@@ -130,12 +185,25 @@ export class BarchartService  {
   }
 
   findBar (params) {
-    if (params && params.root && params.searchTerm && params.root.name !== params.searchTerm &&
-      params.root.children && params.root.children.length) {
-      for (let index in params.root.children) {
-        return this.findBar({root: params.root.children[index], searchTerm: params.searchTerm});
+    if (this.currentRoot) {
+      for (let child of this.currentRoot.children) {
+        if (child.name === params.searchTerm) {
+          return child;
+          
+        } else {
+          return this.findBar({root: child, searchTerm: params.searchTerm});
+        }
       }
-    } else if (true) {
+    } else if (params && params.root && params.searchTerm && params.root.name !== params.searchTerm &&
+      params.root.children && params.root.children.length) {
+      for (let child of params.root.children) {
+        if (child.name === params.searchTerm) {
+          return this.findBar({root: child, searchTerm: params.searchTerm});
+        } else {
+          continue;
+        }
+      }
+    } else {
       return params.root;
     }
   }
@@ -175,7 +243,7 @@ export class BarchartService  {
           xAxisID : 'bar-x-axis1',
           data: Array(7).fill(0)
         }, {
-          backgroundColor : "red",
+          backgroundColor : "green",
           label : 'South',
           xAxisID : 'bar-x-axis1',
           data: Array(7).fill(0)
@@ -183,11 +251,11 @@ export class BarchartService  {
       ];
 
       if (root.children && root.children.length) {
-        for (let index in this.xAxislabels) {
+        for (let dateIndex in this.xAxislabels) {
           for (let zoneIndex in root.children) {
             for (let ride of root.children[zoneIndex].rides) {
-              if (this.xAxislabels[index] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
-                datasets[zoneIndex].data[index] += ride.count;
+              if (this.xAxislabels[dateIndex] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
+                datasets[zoneIndex].data[dateIndex] += ride.count;
                 break;
               }
             }
@@ -305,6 +373,5 @@ function ridesCreator (config) {
     count: totalCount,
     previousCount: totalPreviousCount
   }
-  console.log(driver);
   return driver;
 }
