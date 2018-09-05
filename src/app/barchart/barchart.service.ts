@@ -16,8 +16,25 @@ export class BarchartService  {
     {id: 4, label: '1 year', value: 365},
     {id: 5, label: 'life time', value: Infinity}
   ];
-  currentDate = Date.now();
-  constructor (private datePipe: DatePipe) { }  
+  currentDate = new Date();
+  constructor (private datePipe: DatePipe) { }
+  currentRoot : any;
+
+  data = {
+    labels: this.xAxislabels,
+    datasets: [ {
+      label: 'Driver\'s pick up drop for previous date',
+      data: this.previousSeries,
+      backgroundColor: 'rgb(138, 100, 147)',
+      xAxisID: 'bar-x-axis1'
+    }, {
+        label: 'Driver\'s pick up drop for selected date',
+        data: this.currentSeries,  
+        backgroundColor: 'rgb(161, 170, 218)',
+        xAxisID: 'bar-x-axis1'
+      }
+    ]
+  };
 
   root = {
     name: 'india',
@@ -85,11 +102,10 @@ export class BarchartService  {
   };
 
   computeSeries (params) {
-    let searchResult;
     if (params && this.root.name !== params.searchTerm && this.root.children && this.root.children.length) {
-      searchResult= this.findBar({root: this.root, searchTerm: params.searchTerm});
-      if (searchResult.name === params.searchTerm) {
-        this.updateChart(searchResult);
+      this.currentRoot= this.findBar({root: this.root, searchTerm: params.searchTerm});
+      if (this.currentRoot.name === params.searchTerm) {
+        this.updateChart(this.currentRoot);
       }
     } else if (this.root && this.root.children && this.root.children.length) {
         this.root.children.forEach((child, index)=> {
@@ -124,45 +140,67 @@ export class BarchartService  {
     }
   }
 
-  /*splitByDate (barName) {
-    let driver;
-    if (barName.startsWith('driver')) {
-      for (let hub of this.root.hubs) {
-        for (let drvr of hub.drivers) {
-          if (drvr.name === barName) {
-            driver = drvr;
-            break;
+  splitByDate (params) {
+   if (this.currentRoot && this.currentRoot.rides && this.currentRoot.rides.length) {
+     this.xAxislabels.length = 0;
+     this.currentSeries.length = 0;
+     this.previousSeries.length = 0;
+     this.currentRoot.rides.forEach((ride,index) => {
+       this.xAxislabels[index] = this.datePipe.transform(ride.date, 'dd/MM/yyyy');
+       this.currentSeries[index] = ride.count;
+       this.previousSeries[index] = ride.previousCount;
+     });
+   } else if (this.root && this.root.rides && this.root.rides.length) {
+      this.xAxislabels.length = 0;
+      this.currentSeries.length = 0;
+      this.previousSeries.length = 0;
+      
+      this.root.rides.forEach((ride, index) => {
+        this.xAxislabels[index] = this.datePipe.transform(ride.date, 'dd/MM/yyyy');
+//         this.previousSeries[index] = 0;
+      });
+
+      let datasets = [
+        {
+          backgroundColor : "rgb(138, 100, 147)",
+          label : 'North',
+          xAxisID : 'bar-x-axis1',
+          data: Array(7).fill(0)
+        }, {
+          backgroundColor : "rgb(161, 170, 218)",
+          label : 'East',
+          xAxisID : 'bar-x-axis1',
+          data: Array(7).fill(0)
+        }, {
+          backgroundColor : "red",
+          label : 'West',
+          xAxisID : 'bar-x-axis1',
+          data: Array(7).fill(0)
+        }, {
+          backgroundColor : "red",
+          label : 'South',
+          xAxisID : 'bar-x-axis1',
+          data: Array(7).fill(0)
+        }
+      ];
+
+      if (this.root.children && this.root.children.length) {
+        for (let index in this.xAxislabels) {
+          for (let zoneIndex in this.root.children) {
+            for (let ride of this.root.children[zoneIndex].rides) {
+              if (this.xAxislabels[index] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
+                datasets[zoneIndex].data[index] += ride.count;
+                break;
+              }
+            }
           }
         }
-      }
-      this.xAxislabels.length = 0;      
-      this.currentSeries.length = 0;
-      
-      driver.rides.forEach((ride, index) => {
-        let date = this.datePipe.transform(ride.date, 'dd/MM/yyyy');
-        this.xAxislabels.push(date);
-        this.currentSeries.push(ride.count);
-      });
-      return {
-        xAxislabels: this.xAxislabels,
-        currentSeries: this.currentSeries
+        return {xAxislabels: this.xAxislabels, datasets};
       }
     }
-
-    let hub = this.root.hubs.find(hub => hub.name === barName);
-    hub.drivers.forEach(driver => {
-      driver.rides.forEach((ride, index) => {
-        this.xAxislabels[index] = ride.date;
-        this.currentSeries[index] = ride.count;
-      });
-    });
-    return {
-      xAxislabels: this.xAxislabels,
-      currentSeries: this.currentSeries;
-    };
   }
 
-  splitByDay (barName) {
+  /*splitByDay (barName) {
     let driver;
     if (barName.startsWith('driver')) {
       for (let hub of this.root.hubs) {

@@ -17,6 +17,7 @@ export class BarchartComponent implements OnInit {
   backup = [];
   durations = this.bcs.durations;
   selectedDuration: any;
+  model = 1;
 
   onSelectedDurationChange (a) {
     //console.log(this.selectedDuration);
@@ -106,35 +107,7 @@ export class BarchartComponent implements OnInit {
     this.BarChart.update();
   }
 
-  data = {
-    labels: this.xAxislabels,
-    datasets: [ {
-      label: 'Driver\'s pick up drop for previous date',
-      data: this.previousSeries,
-      /* backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)'
-      ], */
-      backgroundColor: 'rgb(138, 100, 147)',
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)'
-      ],
-//       borderWidth: 3,
-      xAxisID: 'bar-x-axis1'
-    }, {
-        label: 'Driver\'s pick up drop for selected date',
-        data: this.currentSeries,        
-        borderColor: 'black',
-        // borderWidth: 3,
-        // Separate colors for each bars       
-        backgroundColor: 'rgb(161, 170, 218)',
-        xAxisID: 'bar-x-axis1'
-      }
-    ]
-  };
+  data = this.bcs.data;
 
   options = {
 //     tooltips: {
@@ -189,11 +162,11 @@ export class BarchartComponent implements OnInit {
     },
     title: {
       text: 'Bar Chart',
-      display: true
+      display: false
     },
     scales: {
       xAxes: [{
-        // display: false,
+        display: true,
         stacked: true,
         id: 'bar-x-axis1',
         gridLines: {
@@ -219,25 +192,11 @@ export class BarchartComponent implements OnInit {
         this.BarChart.update();
       }
     },
-    events: ['mousemove', 'click'],
-    /* onMousemove: (event) => {
-      Chart.helpers.each(this.BarChart.getDatasetMeta(1).data, function (rectangle) {
-        //rectangle._view.width = rectangle._model.width = 40;
-      });
-      this.BarChart.draw();
-      // this.renderChart();
-    } */
+    events: ['mousemove', 'click']
   };
 
   ngOnInit () {
     this.selectedDuration = this.durations[0];
-    Chart.plugins.register({
-      afterDatasetsUpdate: function(chart) {
-        Chart.helpers.each(chart.getDatasetMeta(1).data, function(rectangle, index) {
-          rectangle._view.width = rectangle._model.width = 70;
-        });
-      }
-    });
 
     let result = this.bcs.traverse(this.bcs.root);
     console.log(this.bcs.root);
@@ -251,20 +210,34 @@ export class BarchartComponent implements OnInit {
       type: 'bar',
       // type: 'horizontalBar',
       data: this.data,
-      options: this.options
+      options: this.options,
+      plugins: [{
+        afterDatasetsUpdate: function(chart) {
+          Chart.helpers.each(chart.getDatasetMeta(1).data, function(rectangle, index) {
+            rectangle._view.width = rectangle._model.width = 70;
+          });
+        }
+      }]
     });
     
-    this.BarChart.config.data.datasets[0].data.forEach((bar, index) => {
+    /*this.BarChart.config.data.datasets[0].data.forEach((bar, index) => {
       dashedBorder(this.BarChart, 0, index, [10, 15]);
-    });
+    }); */
   }
 
-  /* splitByDate () {
+   splitByDate () {
     // params = {barLabel: the bar you want to split 'hub1'};
-    let result = this.bcs.splitByDate('driver1');
-    this.BarChart.update();
+    let result = this.bcs.splitByDate(null);
+    if (result) {
+      this.BarChart.data.datasets.length = 0;
+      result.datasets.forEach((dataset, index) => {        
+        this.BarChart.data.datasets.push(dataset);
+      });
+      this.BarChart.update();
+      //this.BarChart.draw();
+    }
   }
-  splitByDay () {
+  /* splitByDay () {
     let result = this.bcs.splitByDay('driver1');
     this.BarChart.update();
   } */

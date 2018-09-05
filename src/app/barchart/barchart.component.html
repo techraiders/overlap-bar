@@ -1,9 +1,23 @@
 <div>
  <h2 style="background-color: rgba(255, 145, 186, 1)">Bar Chart</h2>
  
- <button (click)="splitByDate()">split by date</button> 
- <button (click)="splitByDay()">split by day</button> 
- <div style="width:50%;">
+ <button class="btn btn-primary" (click)="splitByDate()">split by date</button> 
+ <button class="btn btn-danger disabled" (click)="splitByDay()">split by day</button> 
+
+<form>
+  <legend>Configure</legend>
+  <div class="radio">
+    <label><input type="radio" name="optradio" checked> Timewise </label>
+  </div>
+  <div class="radio">
+    <label><input type="radio" name="optradio" disabled> Daywise</label>
+  </div>
+  <div class="radio disabled">
+    <label><input type="radio" name="optradio" disabled> Hour wise</label>
+  </div>
+</form>
+
+ <div style="width:100%;">
     <select [(ngModel)]="selectedDuration" (change)="onSelectedDurationChange()">
       <option *ngFor="let duration of durations" [ngValue]="duration"> {{duration.label}} </option>
     </select>
