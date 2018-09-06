@@ -18,10 +18,16 @@ export class BarchartService  {
     {id: 5, label: 'life time', value: Infinity}
   ];
   currentDate = new Date();
+  BarChart : any;
   constructor (private datePipe: DatePipe) { }
+
   currentRoot : any;
   backup = [];
   //currentRootsBackup = [];
+
+  onBarChartInitialize (barChart) {
+    this.BarChart = barChart;
+  } 
 
   data = {
     labels: this.xAxislabels,
@@ -207,17 +213,17 @@ export class BarchartService  {
   }
 
   findBar (params) {
-    var currentRoot = null;
+    if (params.root.name === params.searchTerm){
+      return params.root;
+    }
     if(params && params.root && params.root.children && params.root.children.length){
       for (let child of params.root.children){
-        if (child.name === params.searchTerm){
-          return child;
-       }
-        currentRoot = this.findBar({root:child, searchTerm:params.searchTerm});
+        var currentRoot = this.findBar({root:child, searchTerm:params.searchTerm});
         if(currentRoot != null){
           return currentRoot;
         } 
       }
+      return null;
     }else{
       if (params.root.name === params.searchTerm){
         return params.root;
@@ -225,7 +231,6 @@ export class BarchartService  {
         return null;
       }
     }
-    return currentRoot;
   }
 
   splitByDate (params) {
@@ -237,7 +242,27 @@ export class BarchartService  {
   }
 
   splitByDateForThisRoot (root) {
-    this.xAxislabels.length = 0;
+    if (root.children && root.children.length) {
+
+      let backupDataSets = [];
+      this.BarChart.data.datasets.forEach(dataset => {
+        backupDataSets.push({
+          backgroundColor: dataset.backgroundColor,
+          label: dataset.label,
+          xAxisID: dataset.xAxisID,
+          data: dataset.data.map(val => val)
+        });
+      });
+
+      if (backupDataSets && backupDataSets.length) {
+        this.backup.push({
+          splitBy: true,
+          dataSets: backupDataSets,
+          xAxislabels : JSON.parse(JSON.stringify(this.xAxislabels))
+        });
+      }
+
+      this.xAxislabels.length = 0;
       this.currentSeries.length = 0;
       this.previousSeries.length = 0;
       
@@ -270,19 +295,18 @@ export class BarchartService  {
         }
       ];
 
-      if (root.children && root.children.length) {
-        for (let dateIndex in this.xAxislabels) {
-          for (let zoneIndex in root.children) {
-            for (let ride of root.children[zoneIndex].rides) {
-              if (this.xAxislabels[dateIndex] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
-                datasets[zoneIndex].data[dateIndex] += ride.count;
-                break;
-              }
+      for (let dateIndex in this.xAxislabels) {
+        for (let zoneIndex in root.children) {
+          for (let ride of root.children[zoneIndex].rides) {
+            if (this.xAxislabels[dateIndex] === this.datePipe.transform(ride.date, 'dd/MM/yyyy')) {
+              datasets[zoneIndex].data[dateIndex] += ride.count;
+              break;
             }
           }
         }
-        return {xAxislabels: this.xAxislabels, datasets};
       }
+      return {xAxislabels: this.xAxislabels, datasets};
+    }
   }
 
   /*splitByDay (barName) {

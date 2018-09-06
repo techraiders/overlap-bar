@@ -48,13 +48,36 @@ export class BarchartComponent implements OnInit {
     this.bcs.computeSeries(clickedEl);
   }
 
-  goBack () {    
+  goBack (config) {    
     if (this.backup && this.backup.length) {
-      let last = this.backup.pop();
-      //this.bcs.currentRoot = this.currentRootsBackup.pop();
+      let last;
+      if (config && config.top) {
+        last = this.backup[0];
+        this.backup.length = 0;
+      } else last = this.backup.pop();
+      
+      if (last.splitBy) {
+        this.BarChart.data.datasets.length = 0;
+        last.dataSets.forEach(dataset => {
+          this.BarChart.data.datasets.push(dataset);
+        });
+        this.xAxislabels.length = 0;
+        last.xAxislabels.forEach((label, index) => {
+          this.xAxislabels[index] = label;
+        })
+        this.BarChart.options.scales.xAxes.forEach(axis => {axis.stacked = true;});
+        this.BarChart.update();
+        return;
+      }
+      
+
       this.xAxislabels.length = 0;
       this.currentSeries.length = 0;
       this.previousSeries.length = 0;
+
+      this.xAxislabels.forEach((label, index) => {
+        this.BarChart.data.datasets[index]
+      });
 
       last.xAxislabels.forEach((label, index) => {
         this.xAxislabels[index] = label;
@@ -62,35 +85,22 @@ export class BarchartComponent implements OnInit {
       
       last.currentSeries.forEach((val, index) => {
         this.currentSeries[index] = val;
+        this.BarChart.data.datasets[0].data[index] = val;
       });
 
       last.previousSeries.forEach((val, index) => {
         this.previousSeries[index] = val;
+        this.BarChart.data.datasets[1].data[index] = val;
       });
+
+      this.BarChart.options.scales.xAxes.forEach(axis => {axis.stacked = true;});
 
       this.BarChart.update();
     }
   }
 
   goTop () {
-    if (this.backup && this.backup.length) {
-      let first = this.backup[0];
-      this.backup.length = 0;
-
-      first.xAxislabels.forEach((label, index) => {
-        this.xAxislabels[index] = label;
-      });
-
-      first.currentSeries.forEach((val, index) => {
-        this.currentSeries[index] = val;
-      });
-
-      first.previousSeries.forEach((val, index) => {
-        this.previousSeries[index] = val;
-      });
-      //this.bcs.currentRoot = this.currentRootsBackup[0];
-      this.BarChart.update();
-    }
+    this.goBack({top: true});
   }
 
   updateChart (config) {
@@ -216,6 +226,7 @@ export class BarchartComponent implements OnInit {
     this.computeSeries(null);
     
     this.renderChart();
+    this.bcs.onBarChartInitialize (this.BarChart);
   }
 
   renderChart () {    

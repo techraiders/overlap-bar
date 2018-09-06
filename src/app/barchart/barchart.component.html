@@ -11,8 +11,8 @@
       <option *ngFor="let duration of durations" [ngValue]="duration"> {{duration.label}} </option>
     </select>
     Today is: {{ currentDate | date : 'dd/MM/yyyy' }} | Selected Duration is :  {{selectedDuration.value}}  <br/>
-    <a href="javascript: void(0)" (click)="goBack()"> Back </a> <br/> <br/>
-    <a href="javascript: void(0)" (click)="goTop()"> Top </a>
+    <a href="javascript: void(0)" (click)="goBack()" *ngIf="backup.length"> Back </a> <br/> <br/>
+    <a href="javascript: void(0)" (click)="goTop()" *ngIf="backup.length"> Top </a>
     <canvas id="barChart" baseChart class="chart-js-render-monitor" style="display:block;"></canvas>
   </div>
 
