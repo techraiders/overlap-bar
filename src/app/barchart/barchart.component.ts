@@ -14,9 +14,12 @@ export class BarchartComponent implements OnInit {
   previousSeries = this.bcs.previousSeries;
   xAxislabels = this.bcs.xAxislabels;
   currentDate = this.bcs.currentDate;
-  backup = [];
+  backup = this.bcs.backup;
+  currentRoot = this.bcs.currentRoot;
   durations = this.bcs.durations;
   selectedDuration: any;
+  dealers = this.bcs.dealers;
+  //currentRootsBackup = this.bcs.currentRootsBackup;
   model = 1;
 
   onSelectedDurationChange (a) {
@@ -25,6 +28,10 @@ export class BarchartComponent implements OnInit {
 
   constructor (private bcs : BarchartService) { }  
 
+  getDealers (root) {
+    return this.bcs.getDealers(root);
+  }
+
   computeSeries (clickedEl) {
     if (clickedEl) {
       this.backup.push({
@@ -32,6 +39,10 @@ export class BarchartComponent implements OnInit {
         currentSeries: JSON.parse(JSON.stringify(this.currentSeries)),
         previousSeries: JSON.parse(JSON.stringify(this.previousSeries))
       });
+      /*if (this.currentRoot)
+        this.currentRootsBackup.push(this.bcs.currentRoot);
+      else
+        this.currentRootsBackup.push(this.bcs.root); */
     }
     
     this.bcs.computeSeries(clickedEl);
@@ -40,6 +51,7 @@ export class BarchartComponent implements OnInit {
   goBack () {    
     if (this.backup && this.backup.length) {
       let last = this.backup.pop();
+      //this.bcs.currentRoot = this.currentRootsBackup.pop();
       this.xAxislabels.length = 0;
       this.currentSeries.length = 0;
       this.previousSeries.length = 0;
@@ -76,6 +88,7 @@ export class BarchartComponent implements OnInit {
       first.previousSeries.forEach((val, index) => {
         this.previousSeries[index] = val;
       });
+      //this.bcs.currentRoot = this.currentRootsBackup[0];
       this.BarChart.update();
     }
   }
@@ -197,6 +210,7 @@ export class BarchartComponent implements OnInit {
 
   ngOnInit () {
     this.selectedDuration = this.durations[0];
+    this.getDealers(this.bcs.root);
 
     let result = this.bcs.traverse(this.bcs.root);
     this.computeSeries(null);
@@ -232,7 +246,7 @@ export class BarchartComponent implements OnInit {
       result.datasets.forEach((dataset, index) => {        
         this.BarChart.data.datasets.push(dataset);
       });
-      this.BarChart.options.scales.xAxes.forEach(axis => axis.stacked = false;);
+      this.BarChart.options.scales.xAxes.forEach(axis => axis.stacked = false);
       this.BarChart.update();
       //this.BarChart.draw();
     }

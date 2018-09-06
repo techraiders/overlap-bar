@@ -9,6 +9,7 @@ export class BarchartService  {
   currentSeries:any = [2000, 1000, 2000, 1000];
   previousSeries: any = [1000, 2000, 1000, 2000];
   xAxislabels = ['North', 'East', 'West', 'South'];
+  dealers = [];
   durations = [
     {id: 1, label: '7 days', value: 7},
     {id: 2, label: '30 days', value: 30},
@@ -19,6 +20,8 @@ export class BarchartService  {
   currentDate = new Date();
   constructor (private datePipe: DatePipe) { }
   currentRoot : any;
+  backup = [];
+  //currentRootsBackup = [];
 
   data = {
     labels: this.xAxislabels,
@@ -61,7 +64,9 @@ export class BarchartService  {
                 rides: [],
                 children: [
                   {
+                    id: 90596,
                     name: 'dealer1',
+                    type: 'dealer',
                     count: 0,
                     previousCount: 0,
                     rides: [],
@@ -116,7 +121,9 @@ export class BarchartService  {
                 rides: [],
                 children: [
                   {
+                    id: 87645,
                     name: 'east.bihar.chapra.dealer1',
+                    type: 'dealer',
                     count: 0,
                     previousCount: 0,
                     rides: [],
@@ -156,6 +163,21 @@ export class BarchartService  {
     ]
   };
 
+  getDealers (root) {
+    let dealers = [];
+    if (root.type === 'dealer') {
+
+    } else if (root && root.children && root.children.length) {
+      for (let child of root.children) {
+        if (child.type === 'dealer') {
+          return this.getDealers(root);
+        } else {
+          continue;
+        }
+      }
+    }
+  }
+
   computeSeries (params) {
     if (params && this.root.name !== params.searchTerm && this.root.children && this.root.children.length) {
       this.currentRoot= this.findBar({root: this.root, searchTerm: params.searchTerm});
@@ -185,27 +207,25 @@ export class BarchartService  {
   }
 
   findBar (params) {
-    if (this.currentRoot) {
-      for (let child of this.currentRoot.children) {
-        if (child.name === params.searchTerm) {
+    var currentRoot = null;
+    if(params && params.root && params.root.children && params.root.children.length){
+      for (let child of params.root.children){
+        if (child.name === params.searchTerm){
           return child;
-          
-        } else {
-          return this.findBar({root: child, searchTerm: params.searchTerm});
-        }
+       }
+        currentRoot = this.findBar({root:child, searchTerm:params.searchTerm});
+        if(currentRoot != null){
+          return currentRoot;
+        } 
       }
-    } else if (params && params.root && params.searchTerm && params.root.name !== params.searchTerm &&
-      params.root.children && params.root.children.length) {
-      for (let child of params.root.children) {
-        if (child.name === params.searchTerm) {
-          return this.findBar({root: child, searchTerm: params.searchTerm});
-        } else {
-          continue;
-        }
+    }else{
+      if (params.root.name === params.searchTerm){
+        return params.root;
+      }else{
+        return null;
       }
-    } else {
-      return params.root;
     }
+    return currentRoot;
   }
 
   splitByDate (params) {

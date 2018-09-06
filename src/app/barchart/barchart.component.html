@@ -6,7 +6,7 @@
  <button class="btn btn-primary" (click)="splitByDate()">split by date</button> 
  <button class="btn btn-danger disabled" (click)="splitByDay()">split by day</button>
 
- <div style="width:100%;">
+ <div style="width:80%; height:60%;">
     <select [(ngModel)]="selectedDuration" (change)="onSelectedDurationChange()">
       <option *ngFor="let duration of durations" [ngValue]="duration"> {{duration.label}} </option>
     </select>
