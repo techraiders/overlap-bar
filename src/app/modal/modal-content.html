@@ -31,7 +31,8 @@
           <div class="row" *ngIf="configuration.dataHierarchy === 'dealerwise'">
             <div class="col-md-12">
               <div class="radio" *ngFor="let dealer of [{name: 'dealer1'}, {name: 'dealer2'}]">
-                <label> <input type="radio" [value]="dealer.name" name="dealerName" [(ngModel)]="configuration.dealerName"/> {{dealer.name}} </label>
+                <label> <input type="radio" [value]="dealer.name" name="dealerName" [(ngModel)]="configuration.dealerName"
+                  (change)="onDealerChange()"/> {{dealer.name}} </label>
               </div>
             </div>
           </div>

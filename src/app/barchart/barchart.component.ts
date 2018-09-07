@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import * as Chart from 'chart.js';
 import { BarchartService } from './barchart.service';
 
@@ -7,7 +7,7 @@ import { BarchartService } from './barchart.service';
   templateUrl: './barchart.component.html',
   styleUrls: ['./barchart.component.css']
 })
-export class BarchartComponent implements OnInit {
+export class BarchartComponent implements OnInit, OnDestroy {
 
   BarChart : any;
   currentSeries = this.bcs.currentSeries;
@@ -18,7 +18,6 @@ export class BarchartComponent implements OnInit {
   currentRoot = this.bcs.currentRoot;
   durations = this.bcs.durations;
   selectedDuration: any;
-  dealers = this.bcs.dealers;
   //currentRootsBackup = this.bcs.currentRootsBackup;
   model = 1;
 
@@ -27,10 +26,6 @@ export class BarchartComponent implements OnInit {
   }
 
   constructor (private bcs : BarchartService) { }  
-
-  getDealers (root) {
-    return this.bcs.getDealers(root);
-  }
 
   computeSeries (clickedEl) {
     if (clickedEl) {
@@ -220,13 +215,22 @@ export class BarchartComponent implements OnInit {
 
   ngOnInit () {
     this.selectedDuration = this.durations[0];
-    this.getDealers(this.bcs.root);
 
     let result = this.bcs.traverse(this.bcs.root);
     this.computeSeries(null);
     
     this.renderChart();
     this.bcs.onBarChartInitialize (this.BarChart);
+
+    this.bcs.dealerChanged.subscribe(dealerName => {
+      console.log(`dealerNameReceived: ${dealerName}`);
+      let dealer = this.bcs.dealerWise.find(dealer => dealer.name === dealerName);
+      this.bcs.computeSeries(dealer);
+    });
+  }
+
+  ngOnDestroy () {
+    this.bcs.dealerChanged.unsubscribe();
   }
 
   renderChart () {    

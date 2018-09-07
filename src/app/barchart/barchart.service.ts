@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { log } from 'util';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,6 @@ export class BarchartService  {
   currentSeries:any = [2000, 1000, 2000, 1000];
   previousSeries: any = [1000, 2000, 1000, 2000];
   xAxislabels = ['North', 'East', 'West', 'South'];
-  dealers = [];
   durations = [
     {id: 1, label: '7 days', value: 7},
     {id: 2, label: '30 days', value: 30},
@@ -19,6 +18,7 @@ export class BarchartService  {
   ];
   currentDate = new Date();
   BarChart : any;
+  dealerChanged = new Subject();
   constructor (private datePipe: DatePipe) { }
 
   currentRoot : any;
@@ -44,6 +44,36 @@ export class BarchartService  {
       }
     ]
   };
+
+  dealerWise = [
+    {
+      name: 'dealer1',
+      count: 80040,
+      previousCount: 10020,
+      children: [
+        {
+          name: 'north',
+          count: 10087,
+          previousCount: ''
+        },
+        {
+          name: 'east',
+          count: 20364,
+          previousCount: ''
+        },
+        {
+          name: 'west',
+          count: 40520,
+          previousCount: ''
+        },
+        {
+          name: 'south',
+          count: 14367,
+          previousCount: ''
+        }
+      ]
+    }
+  ];
 
   root = {
     name: 'india',
@@ -168,21 +198,6 @@ export class BarchartService  {
       }
     ]
   };
-
-  getDealers (root) {
-    let dealers = [];
-    if (root.type === 'dealer') {
-
-    } else if (root && root.children && root.children.length) {
-      for (let child of root.children) {
-        if (child.type === 'dealer') {
-          return this.getDealers(root);
-        } else {
-          continue;
-        }
-      }
-    }
-  }
 
   computeSeries (params) {
     if (params && this.root.name !== params.searchTerm && this.root.children && this.root.children.length) {
